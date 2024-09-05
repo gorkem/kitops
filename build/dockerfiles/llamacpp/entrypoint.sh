@@ -13,6 +13,15 @@ if [ -z "$MODELKIT_REF" ]; then
   exit 1
 fi
 
-echo "Unpacking modelkit $MODELKIT_REF to $UNPACK_PATH with filter $UNPACK_FILTER"
-kit unpack "$MODELKIT_REF" --dir "$UNPACK_PATH" --model
-llama-server -m $UNPACK_PATH --port 8000 --host 0.0.0.0 -n 512 
+# Check if the kitfile already exists
+if [ ! -f "$UNPACK_PATH/Kitfile" ]; then
+  echo "Unpacking modelkit $MODELKIT_REF to $UNPACK_PATH with filter $UNPACK_FILTER"
+  /kit unpack "$MODELKIT_REF" --dir "$UNPACK_PATH" --filter=model,kitfile
+else
+  # The model is inlined with image
+  echo "Model already exists at $UNPACK_PATH, skipping unpack."
+fi
+
+MODELPATH=$( cat $UNPACK_PATH/Kitfile | /yq ".model.path")
+echo "Loading model from path: $MODELPATH"  
+/llama-server -m $UNPACK_PATH/$MODELPATH --port 8000 --host 0.0.0.0 -n 512 
