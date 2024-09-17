@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jozu-inferrence-microservice
+  labels:
+    app: jozu-inferrence-microservice
+spec:
+  selector:
+    matchLabels:
+      app: jozu-inferrence-microservice
+  template:
+    metadata:
+      labels:
+        app: jozu-inferrence-microservice
+    spec:
+      containers:
+        - name: llamacpp-server
+          image: llamacpp-kit:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MODELKIT_REF
+              value: jozu.ml/jozu/phi3:3.8b-mini-instruct-4k-q4_K_M
+          resources:
+            requests:
+              cpu: 100m
+              memory: 2000Mi
+            limits:
+              memory: 5Gi
+      restartPolicy: Always
